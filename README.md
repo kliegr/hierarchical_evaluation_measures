@@ -13,4 +13,14 @@ The script was developed for evaluation of type quality in DBpedia.
 
 ## Output
 
+    reading gs
+    reading predicted
+    finished reading input datasets
+    total instances in groundtruth:1033.0
+    total instances in intersection of groundtruth and prediction:402.0
+    hP:0.864357864358
+    hR:0.370553665326
+    hF:0.518726997186
+    Precision (exact):0.654228855721
+
 
