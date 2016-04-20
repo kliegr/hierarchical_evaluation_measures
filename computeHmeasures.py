@@ -136,6 +136,7 @@ def perform_eval(input_file_prediction, input_file_groundtruth, output_file_log,
     hR = nominator_sum / totalTh
     hF = (2 * hP * hR) / (hP + hR)
     acc =     P_exact_match_count / total_instances_with_prediction
+    print "instances from gold standard not found in predicted:" + ','.join([e.title() for e in not_found_in_predicted])
     print "total instances in groundtruth:" + str(total_instances_with_excluded)
     print "total instances in intersection of groundtruth and prediction:" + str(total_instances_with_prediction)
     print "hP:" + str(hP)
@@ -143,7 +144,6 @@ def perform_eval(input_file_prediction, input_file_groundtruth, output_file_log,
     print "hF:" + str(hF)
     print "Precision (exact):" + str(acc)
     print " Warning: this metric is not relevant for evaluations where prediction output contains multiple  most specific types"
-    print "not_found_in_predicted:" + ','.join([e.title() for e in not_found_in_predicted])
     return acc, hP,hR,hF
 
 
