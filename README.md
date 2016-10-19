@@ -6,11 +6,13 @@ The script was developed for evaluation of type quality in DBpedia.
 
     python computeHmeasures.py "en.lhd.core.2014.nt" "dbpedia_2014.owl" "gs3-toDBpedia2014.nt" "en.lhd.core.gs3.log"
 
-## Input files
+## Input files - Gold standard datasets
+
 * [en.lhd.core.2014.nt](http://boa.lmcloud.vse.cz/LHD/2014/en.lhd.core.2014.nt.zip)
 * [dbpedia_2014.owl](http://data.dws.informatik.uni-mannheim.de/dbpedia/2014/dbpedia_2014.owl.bz2)
 * [gs3-toDBpedia2014.nt](http://ner.vse.cz/datasets/linkedhypernyms/gs3-toDBpedia2014.nt)
 
+The datasets are described in our [JWS paper](http://nb.vse.cz/~klit01/papers/lhd2_preprint_web.pdf)
 ## Output
 
     reading gs
