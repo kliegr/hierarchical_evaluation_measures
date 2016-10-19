@@ -13,6 +13,8 @@ The script was developed for evaluation of type quality in DBpedia.
 * [gs3-toDBpedia2014.nt](http://ner.vse.cz/datasets/linkedhypernyms/gs3-toDBpedia2014.nt)
 
 The datasets are described in our [JWS paper](http://nb.vse.cz/~klit01/papers/lhd2_preprint_web.pdf)
+
+Additional details can be found here [http://ner.vse.cz/datasets/linkedhypernyms/](http://ner.vse.cz/datasets/linkedhypernyms/)
 ## Output
 
     reading gs
