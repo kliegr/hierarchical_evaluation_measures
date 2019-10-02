@@ -48,7 +48,7 @@ def get_most_specific(candidates):
 
 
 def extract_norm_uri(uric):
-    # print(uric
+    # print(uric)
     if "\\u" in uric:
         uric = uric.decode('unicode-escape')
     norm = URIRef(canonicalize_url(uric.replace("<", "").replace(">", "")))
