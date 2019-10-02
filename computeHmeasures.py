@@ -19,25 +19,27 @@ global g
 
 def get_ancestors_and_self(self):
     ancestors_uris = set([self])
-    c = g.getClass(str(self))
+    c = g.get_class(str(self))
     ancestors = c.ancestors()
     for a in ancestors:
         ancestors_uris.add(a.uri)
     return ancestors_uris
 
+
 def str_to_bool(s):
     if s == 'True':
-         return True
+        return True
     elif s == 'False':
-         return False
+        return False
     else:
-         raise ValueError
+        raise ValueError
+
 
 def get_most_specific(candidates):
     max_ancestor_count = -1
     best_candidate = ""
     for cand in candidates:
-        c = g.getClass(str(cand))
+        c = g.get_class(str(cand))
         ancestor_count = len(c.ancestors())
         if ancestor_count > max_ancestor_count:
             best_candidate = cand
@@ -46,14 +48,13 @@ def get_most_specific(candidates):
 
 
 def extract_norm_uri(uric):
-    #print uric
+    # print(uric
     if "\\u" in uric:
-        uric=uric.decode('unicode-escape')
-    norm = URIRef(canonicalize_url(uric.replace("<","").replace(">","")))
-    #print norm
+        uric = uric.decode('unicode-escape')
+    norm = URIRef(canonicalize_url(uric.replace("<", "").replace(">", "")))
+    # print(norm
     return norm
     # norm = URIRef(urllib.unquote(uric.replace("<","").replace(">","")))
-
 
 
 # This is a faster version, which  first performs filtering of the input file w.r.t. to groundtruth
@@ -67,28 +68,31 @@ def perform_eval(input_file_prediction, input_file_groundtruth, output_file_log,
     else:
         gsfile = open(input_file_groundtruth, 'r')
 
-        #gsfile = codecs.open(input_file_groundtruth, encoding='utf-8')
+        # gsfile = codecs.open(input_file_groundtruth, encoding='utf-8')
         gs_entities = []
-        print "reading gs"
+        print("reading gs")
         for s in gsfile:
             stmt = s.split(" ")
             if len(stmt) == 4:
-                uri=extract_norm_uri(stmt[0])
-                gs.add((uri,RDF.type,extract_norm_uri(stmt[2])))
+                uri = extract_norm_uri(stmt[0])
+
+                gs.add((uri, RDF.type, extract_norm_uri(stmt[2])))
                 gs_entities.append(uri)
         gsfile.close()
-        print "reading predicted"
+        print("reading predicted")
         predicted_file = open(input_file_prediction, 'r')
-        #predicted_file = codecs.open(input_file_prediction, encoding='utf-8')
+        # predicted_file = codecs.open(input_file_prediction, encoding='utf-8')
         for s in predicted_file:
             stmt = s.split(" ")
-            if len(stmt)==4:
+            if len(stmt) == 4:
+
                 # This step may be very slow if the predicted file is large
+
                 uri = extract_norm_uri(stmt[0])
                 if uri in gs_entities:
-                    pred.add((uri,RDF.type,extract_norm_uri(stmt[2])))
+                    pred.add((uri, RDF.type, extract_norm_uri(stmt[2])))
         predicted_file.close()
-    print ("finished reading input datasets")
+    print("finished reading input datasets")
     if output_file_log:
         f = open(output_file_log, 'w')
         f.write("subject,gt,predicted\n")
@@ -103,67 +107,68 @@ def perform_eval(input_file_prediction, input_file_groundtruth, output_file_log,
         try:
             Th = get_ancestors_and_self(exact_gt)
         except Exception as inst:
-            print "omitting following - possibly not found in ontology"
-            print type(inst)
-            print subject
-            print exact_gt
+            print("omitting following - possibly not found in ontology")
+            print(type(inst))
+            print(subject)
+            print(exact_gt)
             continue
         # get results from evaluated file
         total_instances_with_excluded += 1
         hits = pred.objects(subject, RDF.type)
+
         Ph = set([])
 
         for hit in hits:
             # filter out other than DBpedia ontology
-            if type(g.getClass(str(hit))) == OntoClass:
+            if type(g.get_class(str(hit))) == OntoClass:
                 # add superclasses, double additions are automatically resolved, since we use set
                 Ph = set.union(Ph, get_ancestors_and_self(hit))
         if len(Ph) > 0:
             total_instances_with_prediction += 1
             most_specific = get_most_specific(Ph)
             if exact_gt == most_specific:
-                    P_exact_match_count += 1
+                P_exact_match_count += 1
             if output_file_log:
-                f.write((subject + "," + exact_gt + "," + most_specific + "\n").encode('utf-8'))
+                f.write((subject + "," + exact_gt + "," + most_specific + "\n"))
         else:
             not_found_in_predicted.add(subject)
         nominator_sum += len(Th.intersection(Ph))
-        totalPh +=  len(Ph)
+        totalPh += len(Ph)
         totalTh += len(Th)
     if output_file_log:
         f.close()
     hP = nominator_sum / totalPh
     hR = nominator_sum / totalTh
     hF = (2 * hP * hR) / (hP + hR)
-    acc =     P_exact_match_count / total_instances_with_prediction
-    print "instances from gold standard not found in predicted:" + ','.join([e.title() for e in not_found_in_predicted])
-    print "total instances in groundtruth:" + str(total_instances_with_excluded)
-    print "total instances in intersection of groundtruth and prediction:" + str(total_instances_with_prediction)
-    print "hP:" + str(hP)
-    print "hR:" + str(hR)
-    print "hF:" + str(hF)
-    print "Precision (exact):" + str(acc)
-    print " Warning: this metric is not relevant for evaluations where prediction output contains multiple  most specific types"
-    return acc, hP,hR,hF
+    acc = P_exact_match_count / total_instances_with_prediction
+    print("instances from gold standard not found in predicted:" + ','.join([e.title() for e in not_found_in_predicted]))
+    print("total instances in groundtruth:" + str(total_instances_with_excluded))
+    print("total instances in intersection of groundtruth and prediction:" + str(total_instances_with_prediction))
+    print("hP:" + str(hP))
+    print("hR:" + str(hR))
+    print("hF:" + str(hF))
+    print("Precision (exact):" + str(acc))
+    print(" Warning: this metric is not relevant for evaluations where prediction output contains multiple  most specific types")
+    return acc, hP, hR, hF
 
 
 def init_ontology(input_file_ontology):
     global g
-    g = ontospy.Graph(input_file_ontology)
+    g = ontospy.Ontospy(input_file_ontology)
+
 
 parser = argparse.ArgumentParser(description='Compute hierarchical measures.')
 parser.add_argument('input_file_prediction', type=str, nargs='?')  # default="instance_types_en.gs1.nt",
 parser.add_argument('input_file_ontology', type=str, nargs='?')  # default="dbpedia_2014.owl"
 parser.add_argument('input_file_groundtruth', type=str, nargs='?')  # default="gs1-toDBpedia2014.nt"
-parser.add_argument('output_file_log', type=str, nargs='?', default="default.log")  
+parser.add_argument('output_file_log', type=str, nargs='?', default="default.log")
 parser.add_argument('parse_with_rdf_lib', type=str, nargs='?', default="False")
 args = parser.parse_args()
 
 
-print sys.argv
+print(sys.argv)
 if len(sys.argv) > 2:
-    print args
+    print(args)
     init_ontology(args.input_file_ontology)
     perform_eval(args.input_file_prediction, args.input_file_groundtruth, args.output_file_log, str_to_bool(args.parse_with_rdf_lib))
     # perform_eval("hSVMinputFiles/gs1-hSVM22.nt","dbpedia_2014.owl","gs1-toDBpedia2014.nt","instance_types_en.gs1.log", False)
-
